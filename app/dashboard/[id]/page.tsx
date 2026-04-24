@@ -45,6 +45,28 @@ function formatNgn(value: unknown) {
   return ngnFormatter.format(Number(value));
 }
 
+function formatNumber(value: unknown) {
+  return Number(value).toLocaleString("en-NG", {
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatVariance(value: number) {
+  const formattedValue = Math.abs(value).toLocaleString("en-NG", {
+    maximumFractionDigits: 2,
+  });
+
+  if (value > 0) {
+    return `+${formattedValue}`;
+  }
+
+  if (value < 0) {
+    return `-${formattedValue}`;
+  }
+
+  return "0";
+}
+
 function ragBadgeClassName(status: RagStatus) {
   if (status === RagStatus.GREEN) {
     return "border-green-700/20 bg-green-50 text-green-800";
@@ -55,6 +77,18 @@ function ragBadgeClassName(status: RagStatus) {
   }
 
   return "border-red-700/20 bg-red-50 text-red-800";
+}
+
+function ragLabel(status: RagStatus) {
+  if (status === RagStatus.GREEN) {
+    return "Green";
+  }
+
+  if (status === RagStatus.AMBER) {
+    return "Amber";
+  }
+
+  return "Red";
 }
 
 export default async function PortfolioDetailPage({
@@ -91,6 +125,12 @@ export default async function PortfolioDetailPage({
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
+            <CardDescription>Reporting month</CardDescription>
+            <CardTitle>{monthFormatter.format(update.reportingMonth)}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader>
             <CardDescription>Cash position</CardDescription>
             <CardTitle>{formatNgn(update.cashPositionNgn)}</CardTitle>
           </CardHeader>
@@ -100,21 +140,8 @@ export default async function PortfolioDetailPage({
             <CardDescription>RAG status</CardDescription>
             <CardTitle>
               <Badge className={ragBadgeClassName(update.ragStatus)} variant="outline">
-                {update.ragStatus}
+                {ragLabel(update.ragStatus)}
               </Badge>
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>KPIs on track</CardDescription>
-            <CardTitle>
-              {
-                update.kpis.filter(
-                  (kpi) => Number(kpi.actualValue) >= Number(kpi.targetValue),
-                ).length
-              }{" "}
-              / {update.kpis.length}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -141,24 +168,34 @@ export default async function PortfolioDetailPage({
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead>KPI</TableHead>
-                  <TableHead>Target</TableHead>
-                  <TableHead>Actual</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Target value</TableHead>
+                  <TableHead className="text-right">Actual value</TableHead>
+                  <TableHead className="text-right">Variance</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {update.kpis.map((kpi) => {
-                  const isOnTrack = Number(kpi.actualValue) >= Number(kpi.targetValue);
+                  const targetValue = Number(kpi.targetValue);
+                  const actualValue = Number(kpi.actualValue);
+                  const variance = actualValue - targetValue;
 
                   return (
                     <TableRow key={kpi.id}>
                       <TableCell className="font-medium">{kpi.name}</TableCell>
-                      <TableCell>{Number(kpi.targetValue).toLocaleString()}</TableCell>
-                      <TableCell>{Number(kpi.actualValue).toLocaleString()}</TableCell>
-                      <TableCell>
-                        <Badge variant={isOnTrack ? "secondary" : "outline"}>
-                          {isOnTrack ? "On track" : "Behind"}
-                        </Badge>
+                      <TableCell className="text-right">
+                        {formatNumber(targetValue)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatNumber(actualValue)}
+                      </TableCell>
+                      <TableCell
+                        className={
+                          variance >= 0
+                            ? "text-right font-medium text-green-700"
+                            : "text-right font-medium text-red-700"
+                        }
+                      >
+                        {formatVariance(variance)}
                       </TableCell>
                     </TableRow>
                   );
