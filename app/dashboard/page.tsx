@@ -88,7 +88,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard
           detail="Submitted monthly updates"
-          label="Total portfolios"
+          label="Total submissions"
           value={String(portfolioUpdates.length)}
         />
         <MetricCard
