@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RagStatus } from "@/lib/generated/prisma/client";
+import { formatNgn } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 type DashboardPageProps = {
@@ -29,22 +30,11 @@ type DashboardPageProps = {
   }>;
 };
 
-const ngnFormatter = new Intl.NumberFormat("en-NG", {
-  currency: "NGN",
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-  style: "currency",
-});
-
 const monthFormatter = new Intl.DateTimeFormat("en", {
   month: "long",
   timeZone: "UTC",
   year: "numeric",
 });
-
-function formatNgn(value: unknown) {
-  return ngnFormatter.format(Number(value));
-}
 
 function formatMonth(value: Date) {
   return monthFormatter.format(value);

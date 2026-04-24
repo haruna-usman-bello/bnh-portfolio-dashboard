@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { ArrowRight, BarChart3, ClipboardPenLine } from "lucide-react";
 
@@ -9,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { prisma } from "@/lib/prisma";
 
 const priorities = [
   "Track company-level momentum",
@@ -16,7 +19,15 @@ const priorities = [
   "Review executive portfolio signals",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [submissionCount, distinctCompanies] = await Promise.all([
+    prisma.portfolioUpdate.count(),
+    prisma.portfolioUpdate.findMany({
+      distinct: ["portfolioName"],
+      select: { portfolioName: true },
+    }),
+  ]);
+
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-background">
       <section className="mx-auto flex w-full max-w-6xl flex-col px-6 py-8">
@@ -59,11 +70,13 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border bg-muted/40 p-4">
                   <p className="text-sm text-muted-foreground">Companies</p>
-                  <p className="mt-2 text-3xl font-semibold">24</p>
+                  <p className="mt-2 text-3xl font-semibold">
+                    {distinctCompanies.length}
+                  </p>
                 </div>
                 <div className="rounded-lg border bg-muted/40 p-4">
-                  <p className="text-sm text-muted-foreground">Updates due</p>
-                  <p className="mt-2 text-3xl font-semibold">7</p>
+                  <p className="text-sm text-muted-foreground">Submissions</p>
+                  <p className="mt-2 text-3xl font-semibold">{submissionCount}</p>
                 </div>
               </div>
               <div className="space-y-3">

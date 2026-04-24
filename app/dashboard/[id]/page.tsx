@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RagStatus } from "@/lib/generated/prisma/client";
+import { formatNgn, formatNumber } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 type PortfolioDetailPageProps = {
@@ -29,28 +30,11 @@ type PortfolioDetailPageProps = {
   }>;
 };
 
-const ngnFormatter = new Intl.NumberFormat("en-NG", {
-  currency: "NGN",
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-  style: "currency",
-});
-
 const monthFormatter = new Intl.DateTimeFormat("en", {
   month: "long",
   timeZone: "UTC",
   year: "numeric",
 });
-
-function formatNgn(value: unknown) {
-  return ngnFormatter.format(Number(value));
-}
-
-function formatNumber(value: unknown) {
-  return Number(value).toLocaleString("en-NG", {
-    maximumFractionDigits: 2,
-  });
-}
 
 function formatVariance(value: number) {
   const formattedValue = Math.abs(value).toLocaleString("en-NG", {

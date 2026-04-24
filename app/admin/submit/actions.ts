@@ -1,106 +1,97 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { RagStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-const ragStatuses = new Set<string>(Object.values(RagStatus));
-
-function readRequired(formData: FormData, key: string) {
-  const value = formData.get(key);
-
-  if (typeof value !== "string" || value.trim() === "") {
-    return null;
-  }
-
-  return value.trim();
+function numeric(emptyMessage: string, invalidMessage: string) {
+  return z
+    .string()
+    .trim()
+    .min(1, emptyMessage)
+    .refine((v) => Number.isFinite(Number(v)), invalidMessage);
 }
 
-function readNumber(formData: FormData, key: string) {
-  const rawValue = readRequired(formData, key);
+const schema = z.object({
+  portfolioName: z
+    .string()
+    .trim()
+    .min(1, "Enter the portfolio company name."),
+  reportingMonth: z
+    .string()
+    .trim()
+    .min(1, "Select a reporting month.")
+    .regex(/^\d{4}-\d{2}$/, "Select a valid month from the picker."),
+  cashPositionNgn: numeric(
+    "Enter the current cash position.",
+    "Cash position must be a number.",
+  ),
+  ragStatus: z.enum(["RED", "AMBER", "GREEN"], {
+    message: "Select a RAG status — Red, Amber, or Green.",
+  }),
+  primaryExecutionBlocker: z
+    .string()
+    .trim()
+    .min(1, "Describe the primary execution blocker."),
+  kpi1Name: z.string().trim().min(1, "Enter a name for KPI 1."),
+  kpi1TargetValue: numeric("Enter the target value for KPI 1.", "Target value for KPI 1 must be a number."),
+  kpi1ActualValue: numeric("Enter the actual value for KPI 1.", "Actual value for KPI 1 must be a number."),
+  kpi2Name: z.string().trim().min(1, "Enter a name for KPI 2."),
+  kpi2TargetValue: numeric("Enter the target value for KPI 2.", "Target value for KPI 2 must be a number."),
+  kpi2ActualValue: numeric("Enter the actual value for KPI 2.", "Actual value for KPI 2 must be a number."),
+  kpi3Name: z.string().trim().min(1, "Enter a name for KPI 3."),
+  kpi3TargetValue: numeric("Enter the target value for KPI 3.", "Target value for KPI 3 must be a number."),
+  kpi3ActualValue: numeric("Enter the actual value for KPI 3.", "Actual value for KPI 3 must be a number."),
+});
 
-  if (!rawValue) {
-    return null;
-  }
+export type FieldErrors = Partial<Record<keyof z.infer<typeof schema>, string>>;
 
-  const value = Number(rawValue);
+export type FormState = {
+  fieldErrors?: FieldErrors;
+  generalError?: string;
+} | null;
 
-  if (!Number.isFinite(value)) {
-    return null;
-  }
+export async function submitPortfolioUpdate(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const result = schema.safeParse(Object.fromEntries(formData));
 
-  return rawValue;
-}
-
-function redirectWithError(message: string): never {
-  redirect(`/admin/submit?error=${encodeURIComponent(message)}`);
-}
-
-export async function submitPortfolioUpdate(formData: FormData) {
-  const portfolioName = readRequired(formData, "portfolioName");
-  const reportingMonth = readRequired(formData, "reportingMonth");
-  const cashPositionNgn = readNumber(formData, "cashPositionNgn");
-  const ragStatus = readRequired(formData, "ragStatus");
-  const primaryExecutionBlocker = readRequired(formData, "primaryExecutionBlocker");
-
-  if (
-    !portfolioName ||
-    !reportingMonth ||
-    !cashPositionNgn ||
-    !ragStatus ||
-    !primaryExecutionBlocker
-  ) {
-    redirectWithError("Please complete every required field.");
-  }
-
-  if (!/^\d{4}-\d{2}$/.test(reportingMonth)) {
-    redirectWithError("Please select a valid reporting month.");
-  }
-
-  if (!ragStatuses.has(ragStatus)) {
-    redirectWithError("Please select a valid RAG status.");
-  }
-
-  const kpis = [1, 2, 3].map((index) => {
-    const name = readRequired(formData, `kpi${index}Name`);
-    const targetValue = readNumber(formData, `kpi${index}TargetValue`);
-    const actualValue = readNumber(formData, `kpi${index}ActualValue`);
-
-    if (!name || !targetValue || !actualValue) {
-      redirectWithError(`Please complete all fields for KPI ${index}.`);
+  if (!result.success) {
+    const fieldErrors: FieldErrors = {};
+    for (const issue of result.error.issues) {
+      const key = issue.path[0] as keyof FieldErrors;
+      if (!fieldErrors[key]) {
+        fieldErrors[key] = issue.message;
+      }
     }
+    return { fieldErrors };
+  }
 
-    return {
-      name,
-      targetValue,
-      actualValue,
-    };
-  });
+  const d = result.data;
 
-  let didSave = false;
+  const kpis = [
+    { name: d.kpi1Name, targetValue: d.kpi1TargetValue, actualValue: d.kpi1ActualValue },
+    { name: d.kpi2Name, targetValue: d.kpi2TargetValue, actualValue: d.kpi2ActualValue },
+    { name: d.kpi3Name, targetValue: d.kpi3TargetValue, actualValue: d.kpi3ActualValue },
+  ];
 
   try {
     await prisma.portfolioUpdate.create({
       data: {
-        portfolioName,
-        reportingMonth: new Date(`${reportingMonth}-01T00:00:00.000Z`),
-        cashPositionNgn,
-        ragStatus: ragStatus as RagStatus,
-        primaryExecutionBlocker,
-        kpis: {
-          create: kpis,
-        },
+        portfolioName: d.portfolioName,
+        reportingMonth: new Date(`${d.reportingMonth}-01T00:00:00.000Z`),
+        cashPositionNgn: d.cashPositionNgn,
+        ragStatus: d.ragStatus as RagStatus,
+        primaryExecutionBlocker: d.primaryExecutionBlocker,
+        kpis: { create: kpis },
       },
     });
-
-    didSave = true;
   } catch (error) {
     console.error(error);
-  }
-
-  if (!didSave) {
-    redirectWithError("The update could not be saved. Please try again.");
+    return { generalError: "The update could not be saved. Please try again." };
   }
 
   redirect("/dashboard?submitted=1");
