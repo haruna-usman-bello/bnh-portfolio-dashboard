@@ -1,31 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio Intelligence Dashboard
+
+A clean Next.js App Router starter for collecting portfolio company updates and viewing executive portfolio signals.
+
+## Stack
+
+- Next.js with TypeScript
+- Tailwind CSS
+- Shadcn UI-style components
+- Prisma
+- PostgreSQL
+- No authentication
 
 ## Getting Started
 
-First, run the development server:
+Create a local environment file:
 
 ```bash
+cp .env.example .env
+```
+
+Update `DATABASE_URL` in `.env`, then generate the Prisma client and run the development server:
+
+```bash
+npx prisma generate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/` landing page
+- `/submit` portfolio update intake
+- `/dashboard` executive dashboard view
 
-## Learn More
+## Prisma
 
-To learn more about Next.js, take a look at the following resources:
+The Prisma schema lives in `prisma/schema.prisma`. The project expects a PostgreSQL connection string in `DATABASE_URL`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx prisma migrate dev
+```
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 

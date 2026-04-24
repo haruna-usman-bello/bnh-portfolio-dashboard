@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PortfolioUpdate {
+  id              String   @id @default(cuid())
+  companyName     String
+  reportingPeriod String
+  summary         String
+  revenue         Decimal? @db.Decimal(14, 2)
+  runwayMonths    Int?
+  status          String   @default("submitted")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
