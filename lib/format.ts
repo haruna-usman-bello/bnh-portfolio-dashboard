@@ -1,3 +1,13 @@
+const monthFormatter = new Intl.DateTimeFormat("en", {
+  month: "long",
+  timeZone: "UTC",
+  year: "numeric",
+});
+
+export function formatMonth(value: Date): string {
+  return monthFormatter.format(value);
+}
+
 const ngnFormatter = new Intl.NumberFormat("en-NG", {
   currency: "NGN",
   maximumFractionDigits: 0,

@@ -21,48 +21,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RagStatus } from "@/lib/generated/prisma/client";
-import { formatNgn } from "@/lib/format";
+import { formatMonth, formatNgn } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { RagBadge } from "@/components/rag-badge";
 
 type DashboardPageProps = {
   searchParams: Promise<{
     submitted?: string;
   }>;
 };
-
-const monthFormatter = new Intl.DateTimeFormat("en", {
-  month: "long",
-  timeZone: "UTC",
-  year: "numeric",
-});
-
-function formatMonth(value: Date) {
-  return monthFormatter.format(value);
-}
-
-function ragBadgeClassName(status: RagStatus) {
-  if (status === RagStatus.GREEN) {
-    return "border-green-700/20 bg-green-50 text-green-800";
-  }
-
-  if (status === RagStatus.AMBER) {
-    return "border-amber-700/20 bg-amber-50 text-amber-800";
-  }
-
-  return "border-red-700/20 bg-red-50 text-red-800";
-}
-
-function ragLabel(status: RagStatus) {
-  if (status === RagStatus.GREEN) {
-    return "Green";
-  }
-
-  if (status === RagStatus.AMBER) {
-    return "Amber";
-  }
-
-  return "Red";
-}
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const { submitted } = await searchParams;
@@ -187,12 +154,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                           {formatNgn(update.cashPositionNgn)}
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            className={ragBadgeClassName(update.ragStatus)}
-                            variant="outline"
-                          >
-                            {ragLabel(update.ragStatus)}
-                          </Badge>
+                          <RagBadge status={update.ragStatus} />
                         </TableCell>
                         <TableCell className="min-w-72 max-w-md text-muted-foreground">
                           {update.primaryExecutionBlocker}

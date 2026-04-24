@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { PageShell } from "@/components/page-shell";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,9 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RagStatus } from "@/lib/generated/prisma/client";
-import { formatNgn, formatNumber } from "@/lib/format";
+import { formatMonth, formatNgn, formatNumber } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { RagBadge } from "@/components/rag-badge";
 
 type PortfolioDetailPageProps = {
   params: Promise<{
@@ -30,50 +29,14 @@ type PortfolioDetailPageProps = {
   }>;
 };
 
-const monthFormatter = new Intl.DateTimeFormat("en", {
-  month: "long",
-  timeZone: "UTC",
-  year: "numeric",
-});
-
 function formatVariance(value: number) {
   const formattedValue = Math.abs(value).toLocaleString("en-NG", {
     maximumFractionDigits: 2,
   });
 
-  if (value > 0) {
-    return `+${formattedValue}`;
-  }
-
-  if (value < 0) {
-    return `-${formattedValue}`;
-  }
-
+  if (value > 0) return `+${formattedValue}`;
+  if (value < 0) return `-${formattedValue}`;
   return "0";
-}
-
-function ragBadgeClassName(status: RagStatus) {
-  if (status === RagStatus.GREEN) {
-    return "border-green-700/20 bg-green-50 text-green-800";
-  }
-
-  if (status === RagStatus.AMBER) {
-    return "border-amber-700/20 bg-amber-50 text-amber-800";
-  }
-
-  return "border-red-700/20 bg-red-50 text-red-800";
-}
-
-function ragLabel(status: RagStatus) {
-  if (status === RagStatus.GREEN) {
-    return "Green";
-  }
-
-  if (status === RagStatus.AMBER) {
-    return "Amber";
-  }
-
-  return "Red";
 }
 
 export default async function PortfolioDetailPage({
@@ -97,7 +60,7 @@ export default async function PortfolioDetailPage({
     <PageShell
       eyebrow="Portfolio details"
       title={update.portfolioName}
-      description={`${monthFormatter.format(update.reportingMonth)} performance and execution context.`}
+      description={`${formatMonth(update.reportingMonth)} performance and execution context.`}
       action={
         <Button asChild variant="outline">
           <Link href="/dashboard">
@@ -111,7 +74,7 @@ export default async function PortfolioDetailPage({
         <Card>
           <CardHeader>
             <CardDescription>Reporting month</CardDescription>
-            <CardTitle>{monthFormatter.format(update.reportingMonth)}</CardTitle>
+            <CardTitle>{formatMonth(update.reportingMonth)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -124,9 +87,7 @@ export default async function PortfolioDetailPage({
           <CardHeader>
             <CardDescription>RAG status</CardDescription>
             <CardTitle>
-              <Badge className={ragBadgeClassName(update.ragStatus)} variant="outline">
-                {ragLabel(update.ragStatus)}
-              </Badge>
+              <RagBadge status={update.ragStatus} />
             </CardTitle>
           </CardHeader>
         </Card>
