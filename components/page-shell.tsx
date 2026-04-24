@@ -16,7 +16,7 @@ export function PageShell({
   children,
 }: PageShellProps) {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-[calc(100vh-4rem)] bg-background">
       <section className="mx-auto w-full max-w-6xl px-6 py-8">
         <header className="mb-8 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">

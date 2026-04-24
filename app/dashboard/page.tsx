@@ -32,11 +32,12 @@ type DashboardPageProps = {
 const ngnFormatter = new Intl.NumberFormat("en-NG", {
   currency: "NGN",
   maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
   style: "currency",
 });
 
 const monthFormatter = new Intl.DateTimeFormat("en", {
-  month: "short",
+  month: "long",
   timeZone: "UTC",
   year: "numeric",
 });
@@ -229,6 +230,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <p className="mt-2 text-sm text-muted-foreground">
                 New submissions from Portfolio Managers will appear here automatically.
               </p>
+              <Button asChild className="mt-5">
+                <Link href="/admin/submit">
+                  <Plus className="h-4 w-4" />
+                  Submit first update
+                </Link>
+              </Button>
             </div>
           )}
         </CardContent>

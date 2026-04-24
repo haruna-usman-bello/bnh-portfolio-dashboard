@@ -1,17 +1,25 @@
 # Portfolio Intelligence Dashboard
 
-A clean Next.js App Router starter for collecting portfolio company updates and viewing executive portfolio signals.
+A simple internal prototype for collecting monthly portfolio company updates and giving the Chief of Staff an executive view of portfolio health.
 
-## Stack
+Portfolio Managers submit cash position, RAG status, primary blockers, and three KPIs. The dashboard reads those submissions from PostgreSQL and summarizes portfolio exposure, health status, and KPI performance.
 
-- Next.js with TypeScript
+## Tech Stack
+
+- Next.js App Router with TypeScript
+- React Server Components and Server Actions
 - Tailwind CSS
 - Shadcn UI-style components
-- Prisma
+- Prisma 7
 - PostgreSQL
-- No authentication
 
-## Getting Started
+## Run Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
 
 Create a local environment file:
 
@@ -19,33 +27,90 @@ Create a local environment file:
 cp .env.example .env
 ```
 
-Update `DATABASE_URL` in `.env`, then generate the Prisma client and run the development server:
+Start the development server:
 
 ```bash
-npx prisma generate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the app at:
 
-## Routes
-
-- `/` landing page
-- `/submit` portfolio update intake
-- `/dashboard` executive dashboard view
-
-## Prisma
-
-The Prisma schema lives in `prisma/schema.prisma`. The project expects a PostgreSQL connection string in `DATABASE_URL`.
-
-```bash
-npx prisma migrate dev
+```text
+http://localhost:3000
 ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If port `3000` is busy, Next.js will print the alternate local URL.
 
-## Deploy on Vercel
+## Configure Database
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Set `DATABASE_URL` in `.env` to your PostgreSQL database:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+DATABASE_URL="postgresql://postgres:2004@localhost:5432/bnh?schema=public"
+```
+
+Make sure PostgreSQL is running and the database exists before running Prisma commands.
+
+## Prisma Migration
+
+Generate the Prisma client:
+
+```bash
+npx prisma generate
+```
+
+Create and apply a migration:
+
+```bash
+npx prisma migrate dev --name portfolio-intelligence-dashboard
+```
+
+For quick local prototyping, you can push the schema directly:
+
+```bash
+npx prisma db push
+```
+
+## Seed Sample Data
+
+The seed script creates three fictitious portfolio companies:
+
+- Alpha Foods Limited
+- NovaPay Finance
+- GreenGrid Energy
+
+Run:
+
+```bash
+npx prisma db seed
+```
+
+The seed command is configured in `prisma.config.ts` and uses `prisma/seed.ts`.
+
+## Test The Prototype
+
+1. Start PostgreSQL.
+2. Confirm `DATABASE_URL` points to your local database.
+3. Run `npx prisma migrate dev --name portfolio-intelligence-dashboard`.
+4. Run `npx prisma db seed`.
+5. Run `npm run dev`.
+6. Open `/dashboard` to review seeded portfolio submissions.
+7. Open `/admin/submit` to add a new monthly update.
+8. Return to `/dashboard` and use the View button to inspect one portfolio in detail.
+
+## Useful Routes
+
+- `/` - prototype home
+- `/dashboard` - Chief of Staff dashboard
+- `/dashboard/[id]` - portfolio update detail page
+- `/admin/submit` - Portfolio Manager submission form
+
+## Verification
+
+Run local checks:
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```

@@ -18,23 +18,9 @@ const priorities = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-8">
-        <header className="flex items-center justify-between border-b pb-5">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              BNH Portfolio
-            </p>
-            <h1 className="text-xl font-semibold tracking-tight">
-              Portfolio Intelligence Dashboard
-            </h1>
-          </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/dashboard">Dashboard</Link>
-          </Button>
-        </header>
-
-        <div className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[1.08fr_0.92fr]">
+    <main className="min-h-[calc(100vh-4rem)] bg-background">
+      <section className="mx-auto flex w-full max-w-6xl flex-col px-6 py-8">
+        <div className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[1.08fr_0.92fr]">
           <div className="max-w-2xl">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Executive portfolio operations
@@ -50,7 +36,7 @@ export default function Home() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link href="/submit">
+                <Link href="/admin/submit">
                   <ClipboardPenLine className="h-4 w-4" />
                   Submit Portfolio Update
                 </Link>

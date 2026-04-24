@@ -32,6 +32,7 @@ type PortfolioDetailPageProps = {
 const ngnFormatter = new Intl.NumberFormat("en-NG", {
   currency: "NGN",
   maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
   style: "currency",
 });
 
