@@ -7,14 +7,33 @@ datasource db {
   provider = "postgresql"
 }
 
+enum RagStatus {
+  RED
+  AMBER
+  GREEN
+}
+
 model PortfolioUpdate {
-  id              String   @id @default(cuid())
-  companyName     String
-  reportingPeriod String
-  summary         String
-  revenue         Decimal? @db.Decimal(14, 2)
-  runwayMonths    Int?
-  status          String   @default("submitted")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                      String    @id @default(cuid())
+  portfolioName           String
+  reportingMonth          DateTime  @db.Date
+  cashPositionNgn         Decimal   @db.Decimal(18, 2)
+  ragStatus               RagStatus
+  primaryExecutionBlocker String
+  kpis                    Kpi[]
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@unique([portfolioName, reportingMonth])
+}
+
+model Kpi {
+  id                String          @id @default(cuid())
+  name              String
+  targetValue       Decimal         @db.Decimal(14, 2)
+  actualValue       Decimal         @db.Decimal(14, 2)
+  portfolioUpdateId String
+  portfolioUpdate   PortfolioUpdate @relation(fields: [portfolioUpdateId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioUpdateId, name])
 }
