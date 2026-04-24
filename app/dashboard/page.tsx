@@ -19,7 +19,15 @@ const companies = [
   { name: "Northstar AI", stage: "Series B", revenue: "$5.2M", status: "Ahead" },
 ];
 
-export default function DashboardPage() {
+type DashboardPageProps = {
+  searchParams: Promise<{
+    submitted?: string;
+  }>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const { submitted } = await searchParams;
+
   return (
     <PageShell
       eyebrow="Executive dashboard"
@@ -34,6 +42,12 @@ export default function DashboardPage() {
         </Button>
       }
     >
+      {submitted === "1" ? (
+        <div className="rounded-md border border-green-700/20 bg-green-50 px-4 py-3 text-sm text-green-800">
+          Portfolio update submitted successfully.
+        </div>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-3">
         <MetricCard label="Total portfolio value" value="$128.4M" detail="+8.2% quarter over quarter" />
         <MetricCard label="Runway average" value="18 mo" detail="Across reporting companies" />
